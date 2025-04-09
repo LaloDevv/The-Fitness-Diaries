@@ -11,6 +11,12 @@ const colors = {
     gray: "#64748b",
     danger: "#ef4444",
     success: "#22c55e",
+    fitness: {
+      darkBackground: "#0f172a",
+      pastelYellow: "#fef08a",
+      darkGray: "#1e293b",
+      yellow: "#facc15",
+    },
   };
   
 export default colors;  

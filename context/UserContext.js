@@ -4,11 +4,17 @@ import userData from "../data/userData";
 import Toast from 'react-native-toast-message';
 import strings from "../constants/strings";
 
+// Create the user context with undefined initial value
 const UserContext = createContext(undefined);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(userData);
 
+  /**********************************************
+  /* Description: Add a new workout             *
+  /* args: workout (object with workout data)   *
+  /* Output: updates user state and shows toast *
+  /**********************************************/
   const addWorkout = (workout) => {
     const newWorkout = {
       ...workout,
@@ -26,6 +32,11 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  /**********************************************
+  /* Description: Update an existing workout    *
+  /* args: workout (object with updated data)   *
+  /* Output: updates user state and shows toast *
+  /**********************************************/
   const updateWorkout = (workout) => {
     setUser(prevUser => ({
       ...prevUser,
@@ -38,6 +49,11 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  /**********************************************
+  /* Description: Delete a workout by its ID    *
+  /* args: workoutId (string)                   *
+  /* Output: updates user state and shows toast *
+  /**********************************************/
   const deleteWorkout = (workoutId) => {
     setUser(prevUser => ({
       ...prevUser,
@@ -50,6 +66,11 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  /********************************************************
+  /* Description: Add a new workout session                *
+  /* args: session (object with session data)              *
+  /* Output: updates user state and shows toast            *
+  /********************************************************/
   const addWorkoutSession = (session) => {
     const newSession = {
       ...session,
@@ -68,6 +89,11 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  /***********************************************************
+  /* Description: Update an existing workout session         *
+  /* args: session (object with updated session data)        *
+  /* Output: updates user state and shows toast              *
+  /***********************************************************/
   const updateWorkoutSession = (session) => {
     setUser(prevUser => ({
       ...prevUser,
@@ -82,6 +108,11 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  /*************************************************************
+  /* Description: Add or update a weight entry for a given week*
+  /* args: entry (object with week and weight)                 *
+  /* Output: updates user state and shows toast                *
+  /*************************************************************/
   const addWeightEntry = (entry) => {
     const weekExists = user.weightEntries.some(w => w.week === entry.week);
 
@@ -117,6 +148,11 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  /**************************************************************
+  /* Description: Get the next available week number            *
+  /* args: none                                                 *
+  /* Output: number (next week based on weight or sessions)     *
+  /**************************************************************/
   const getCurrentWeekNumber = () => {
     if (user.weightEntries.length > 0) {
       const latestWeek = Math.max(...user.weightEntries.map(w => w.week));
@@ -149,6 +185,7 @@ export const UserProvider = ({ children }) => {
   );
 };
 
+// Custom hook to access the user context
 export const useUser = () => {
   const context = useContext(UserContext);
   if (context === undefined) {
