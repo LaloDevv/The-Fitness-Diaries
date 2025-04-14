@@ -27,7 +27,7 @@ export default function TabLayout() {
             resizeMode="contain"
           />
         ),
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.fitness.pastelYellow,
         tabBarStyle: {
           backgroundColor: colors.darkBackground,
         },

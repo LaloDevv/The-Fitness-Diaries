@@ -9,12 +9,11 @@ const colors = {
     textSecondary: "#cbd5e1",
     textMuted: "#94a3b8",
     gray: "#64748b",
+    darkGrayPressed: "#374151",
     danger: "#ef4444",
     success: "#22c55e",
     fitness: {
-      darkBackground: "#0f172a",
       pastelYellow: "#fef08a",
-      darkGray: "#1e293b",
       yellow: "#facc15",
     },
   };
