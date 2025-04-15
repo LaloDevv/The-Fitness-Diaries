@@ -1,15 +1,20 @@
 /* eslint-disable prettier/prettier */
 const userData = {
   id: "user1",
-  name: "Alex Johnson",
+  name: "Lalo",
   age: 28,
   height: 180,
   weightEntries: [
-    { week: 1, date: "2025-03-01", weight: 85.5 },
-    { week: 2, date: "2025-03-08", weight: 84.8 },
-    { week: 3, date: "2025-03-15", weight: 84.2 },
-    { week: 4, date: "2025-03-22", weight: 83.9 },
-    { week: 5, date: "2025-03-29", weight: 83.5 },
+    { week: 1, date: "2024-12-23", weight: 90.0 },
+    { week: 2, date: "2024-12-30", weight: 89.2 },
+    { week: 3, date: "2025-01-06", weight: 88.7 },
+    { week: 4, date: "2025-01-13", weight: 87.9 },
+    { week: 5, date: "2025-01-20", weight: 87.2 },
+    { week: 6, date: "2025-01-27", weight: 86.8 },
+    { week: 7, date: "2025-02-05", weight: 86.0 },
+    { week: 8, date: "2025-02-12", weight: 85.5 },
+    { week: 9, date: "2025-02-24", weight: 85.1 },
+    { week: 10, date: "2025-03-03", weight: 84.8 },
   ],
   workouts: [
     {
@@ -151,6 +156,18 @@ const userData = {
         },
       ],
     },
+  ],
+  weeks: [
+    "2024-12-23",
+    "2024-12-30",
+    "2025-01-06",
+    "2025-01-13",
+    "2025-01-20",
+    "2025-01-27",
+    "2025-02-05",
+    "2025-02-12",
+    "2025-02-24",
+    "2025-03-03",
   ],
 };
 

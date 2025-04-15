@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 import userData from "../data/userData";
 import Toast from 'react-native-toast-message';
 import strings from "../constants/strings";
+import { startOfWeek } from "date-fns";
 
 // Create the user context with undefined initial value
 const UserContext = createContext(undefined);
@@ -66,27 +67,41 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  /********************************************************
-  /* Description: Add a new workout session                *
-  /* args: session (object with session data)              *
-  /* Output: updates user state and shows toast            *
-  /********************************************************/
+  /***********************************************************
+  * Description: Adds a workout session and updates weeks    *
+  * args:                                                    *
+  *   - session: { exercises: [...] }                        *
+  * Output: updates user.weeks, workoutSessions, and toast   *
+  ***********************************************************/
   const addWorkoutSession = (session) => {
+    const today = new Date();
+    const todayISO = today.toISOString().split("T")[0];
+
+    // Normalize today to the Monday of the week
+    const monday = startOfWeek(today, { weekStartsOn: 1 });
+    const mondayISO = monday.toISOString().split("T")[0];
+
+    // Check if this week's Monday already exists
+    const alreadyExists = user.weeks.includes(mondayISO);
+
+    const updatedWeeks = alreadyExists
+      ? [...user.weeks]
+      : [...user.weeks, mondayISO];
+
+    const newWeekNumber = updatedWeeks.length;
+
     const newSession = {
       ...session,
       id: `session${user.workoutSessions.length + 1}`,
-      date: new Date().toISOString().split('T')[0],
+      date: todayISO,
+      weekNumber: newWeekNumber,
     };
 
-    setUser(prevUser => ({
+    setUser((prevUser) => ({
       ...prevUser,
+      weeks: updatedWeeks,
       workoutSessions: [...prevUser.workoutSessions, newSession],
     }));
-
-    Toast.show({
-      type: 'success',
-      text1: strings.successAddSession,
-    });
   };
 
   /***********************************************************
@@ -109,44 +124,60 @@ export const UserProvider = ({ children }) => {
   };
 
   /*************************************************************
-  /* Description: Add or update a weight entry for a given week*
-  /* args: entry (object with week and weight)                 *
-  /* Output: updates user state and shows toast                *
-  /*************************************************************/
-  const addWeightEntry = (entry) => {
-    const weekExists = user.weightEntries.some(w => w.week === entry.week);
+* Description: Add or update weight entry for current week  *
+* args: entry (object with { weight })                      *
+* Output: updates user.weightEntries and user.weeks         *
+*************************************************************/
+const addWeightEntry = (entry) => {
+  const today = new Date();
+  const todayISO = today.toISOString().split("T")[0];
+  const monday = startOfWeek(today, { weekStartsOn: 1 });
+  const mondayISO = monday.toISOString().split("T")[0];
 
-    if (weekExists) {
-      setUser(prevUser => ({
-        ...prevUser,
-        weightEntries: prevUser.weightEntries.map(w =>
-          w.week === entry.week
-            ? { ...w, weight: entry.weight, date: new Date().toISOString().split('T')[0] }
-            : w
-        ),
-      }));
+  // Actualizar weeks si no existe la semana
+  const alreadyExists = user.weeks.includes(mondayISO);
+  const updatedWeeks = alreadyExists
+    ? [...user.weeks]
+    : [...user.weeks, mondayISO];
 
-      Toast.show({
-        type: 'success',
-        text1: strings.successUpdateWeight,
-      });
-    } else {
-      const newEntry = {
-        ...entry,
-        date: new Date().toISOString().split('T')[0],
-      };
+  const weekNumber = updatedWeeks.indexOf(mondayISO) + 1;
 
-      setUser(prevUser => ({
-        ...prevUser,
-        weightEntries: [...prevUser.weightEntries, newEntry].sort((a, b) => a.week - b.week),
-      }));
+  const weekExists = user.weightEntries.some(w => w.week === weekNumber);
 
-      Toast.show({
-        type: 'success',
-        text1: strings.successAddWeight,
-      });
-    }
-  };
+  if (weekExists) {
+    setUser(prevUser => ({
+      ...prevUser,
+      weeks: updatedWeeks,
+      weightEntries: prevUser.weightEntries.map(w =>
+        w.week === weekNumber
+          ? { ...w, weight: entry.weight, date: todayISO }
+          : w
+      ),
+    }));
+
+    Toast.show({
+      type: 'success',
+      text1: strings.successUpdateWeight,
+    });
+  } else {
+    const newEntry = {
+      weight: entry.weight,
+      date: todayISO,
+      week: weekNumber,
+    };
+
+    setUser(prevUser => ({
+      ...prevUser,
+      weeks: updatedWeeks,
+      weightEntries: [...prevUser.weightEntries, newEntry].sort((a, b) => a.week - b.week),
+    }));
+
+    Toast.show({
+      type: 'success',
+      text1: strings.successAddWeight,
+    });
+  }
+};
 
   /**************************************************************
   /* Description: Get the next available week number            *

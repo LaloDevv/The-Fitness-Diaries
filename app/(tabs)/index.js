@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -23,7 +23,12 @@ export default function Home() {
   const { user, deleteWorkout } = useUser();
   const router = useRouter();
 
-  const confirmDelete = (id) => {
+  /***********************************************************
+  * Description: Confirms and deletes a workout              *
+  * args: id (string)                                        *
+  * Output: opens alert dialog before deletion               *
+  ***********************************************************/
+  const confirmDelete = useCallback((id) => {
     Alert.alert(
       "Delete Workout",
       "Are you sure you want to delete this workout?",
@@ -36,9 +41,15 @@ export default function Home() {
         },
       ]
     );
-  };
+  }, [deleteWorkout]);
 
-  const renderWorkout = ({ item: workout }) => (
+  /***********************************************************
+  * Description: Renders a single workout item              *
+  * useCallback: prevents re-creating function on re-renders*
+  * args: item: { workout }                                 *
+  * Output: JSX component for each workout card             *
+  ***********************************************************/
+  const renderWorkout = useCallback(({ item: workout }) => (
     <Pressable
       key={workout.id}
       onPress={() => router.push(`/start-workout/${workout.id}`)}
@@ -49,10 +60,16 @@ export default function Home() {
         <Text className="text-lg font-semibold mb-2" style={{ color: colors.fitness.pastelYellow }}>
           {workout.name}
         </Text>
-        <Pressable onPress={() => confirmDelete(workout.id)}>
-          <Trash2 size={18} color="#f87171" />
-        </Pressable>
+        <View className="flex-row gap-2">
+          <Pressable onPress={() => router.push(`/edit/${workout.id}`)}>
+            <Text className="text-white text-sm">✏️</Text>
+          </Pressable>
+          <Pressable onPress={() => confirmDelete(workout.id)}>
+            <Trash2 size={18} color="#f87171" />
+          </Pressable>
+        </View>
       </View>
+
 
       <Text className="text-sm text-gray-400 mb-2">
         {workout.exercises.length} exercises
@@ -75,17 +92,32 @@ export default function Home() {
         )}
       </View>
     </Pressable>
-  );
+  ), [router, confirmDelete]);
+  //react force you to add all the external variables to the useCallback dependencies array
+
+  /***********************************************************
+  * Description: Memoized version of workouts list          *
+  * useMemo: avoids recalculating unless data changes       *
+  * args: none                                              *
+  * Output: optimized list of workouts                      *
+  ***********************************************************/
+  const workouts = useMemo(() => {
+    return user.workouts;
+  }, [user.workouts]);
 
   return (
     <FlatList
       className="px-4 pt-6"
       style={{ backgroundColor: colors.darkBackground }}
-      data={user.workouts}
+      data={workouts}
       keyExtractor={(item) => item.id}
+      renderItem={renderWorkout}
       ListHeaderComponent={
         <View className="items-center">
-          <Text className="text-2xl italic font-bold" style={{ color: colors.fitness.pastelYellow }}>
+          <Text
+            className="text-2xl italic font-bold"
+            style={{ color: colors.fitness.pastelYellow }}
+          >
             {strings.welcomeMessage}{user.name}!
           </Text>
           <Text className="text-gray-400 text-center mb-6">
@@ -100,7 +132,6 @@ export default function Home() {
           </Text>
         </View>
       }
-      renderItem={renderWorkout}
       ListFooterComponent={
         <View className="items-center rounded-md mb-10">
           <Button
@@ -115,7 +146,6 @@ export default function Home() {
           </Button>
         </View>
       }
-            
     />
   );
 }

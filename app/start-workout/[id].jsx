@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,19 +14,22 @@ import { Label } from "../../components/ui/Label";
 import { Input } from "../../components/ui/Input";
 import Toast from "react-native-toast-message";
 import colors from "../../constants/colors";
+import strings from "../../constants/strings";
 import { ArrowLeft } from "lucide-react-native";
+import { twMerge } from "tailwind-merge";
 
 export default function StartWorkout() {
   const { id } = useLocalSearchParams();
   const { user, addWorkoutSession } = useUser();
   const router = useRouter();
+  const [inputErrors, setInputErrors] = useState({});
 
   const workout = user.workouts.find((w) => w.id === id);
 
   /***********************************************************
-  * Description: Initializes the session from the selected workout
-  * args: none
-  * Output: State array of exercises with initialized sets
+  * Description: Initializes the session from the workout   *
+  * Output: session state with exercises and set fields     *
+  * Note: weight/reps are stored as strings for safe input  *
   ***********************************************************/
   const [session, setSession] = useState(
     workout.exercises.map((exercise) => ({
@@ -34,33 +37,55 @@ export default function StartWorkout() {
       name: exercise.name,
       sets: Array.from({ length: exercise.sets }).map((_, index) => ({
         id: `set${index + 1}`,
-        weight: 0,
-        reps: 0,
+        weight: "0",
+        reps: "0",
         completed: false,
       })),
     }))
   );
 
   /***********************************************************
-  * Description: Updates a field (weight or reps) in a specific set
-  * args:
-  *   - exerciseIndex: number
-  *   - setIndex: number
-  *   - field: "weight" | "reps"
-  *   - value: string
-  * Output: Updates session state with clamped numeric value
+  * Description: Updates weight/reps fields in state        *
+  * Memoized to prevent re-creating on every render         *
+  * args: exerciseIndex, setIndex, field, value             *
   ***********************************************************/
-  const handleChange = (exerciseIndex, setIndex, field, value) => {
+  const handleChange = useCallback((exerciseIndex, setIndex, field, value) => {
     const updated = [...session];
-    const numericValue = Math.max(0, parseInt(value) || 0);
-    updated[exerciseIndex].sets[setIndex][field] = numericValue;
+    updated[exerciseIndex].sets[setIndex][field] = value;
+
+    const isNegative = parseFloat(value) < 0;
+    const errorKey = `${exerciseIndex}-${setIndex}-${field}`;
+
+    setInputErrors((prev) => ({
+      ...prev,
+      [errorKey]: isNegative
+        ? `${field === "weight" ? "Weight" : "Reps"} must be 0 or higher`
+        : undefined,
+    }));
+
     setSession(updated);
-  };
+  }, [session]);
 
   /***********************************************************
-  * Description: Opens a confirmation alert before saving session
-  * args: none
-  * Output: Triggers saveSession on confirmation
+  * Description: Adds a new empty set to the given exercise *
+  * Memoized to prevent re-creation                         *
+  * args: exerciseIndex (number)                            *
+  ***********************************************************/
+  const handleAddSet = useCallback((exerciseIndex) => {
+    const updated = [...session];
+    const newSet = {
+      id: `set${updated[exerciseIndex].sets.length + 1}`,
+      weight: "0",
+      reps: "0",
+      completed: false,
+    };
+    updated[exerciseIndex].sets.push(newSet);
+    setSession(updated);
+  }, [session]);
+
+  /***********************************************************
+  * Description: Triggers a confirmation alert              *
+  * args: none                                              *
   ***********************************************************/
   const handleSubmitConfirm = () => {
     Alert.alert(
@@ -74,48 +99,44 @@ export default function StartWorkout() {
   };
 
   /***********************************************************
-  * Description: Saves session data into context and goes back
-  * args: none
-  * Output: Updates global state and shows success toast
+  * Description: Parses values and saves the workout        *
+  * args: none                                              *
+  * Output: updates context and shows toast                 *
   ***********************************************************/
   const saveSession = () => {
-    addWorkoutSession({
-      weekNumber: user.weightEntries.length + 1,
-      exercises: session,
-    });
+    const hasErrors = Object.values(inputErrors).some(Boolean);
+    if (hasErrors) {
+      Toast.show({
+        type: "error",
+        text1: "Fix input errors before saving",
+      });
+      return;
+    }
+
+    const parsedSession = session.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map((set) => ({
+        ...set,
+        weight: Math.max(0, parseFloat(set.weight) || 0),
+        reps: Math.max(0, parseInt(set.reps) || 0),
+      })),
+    }));
+
+    addWorkoutSession({ exercises: parsedSession });
 
     Toast.show({
       type: "success",
-      text1: "Workout session saved!",
+      text1: strings.successAddSession,
     });
 
     router.back();
   };
 
   /***********************************************************
-  * Description: Adds a new set to a given exercise
-  * args:
-  *   - exerciseIndex: number
-  * Output: Updates session state with a new set
+  * Description: Renders each exercise block                *
+  * Memoized for FlatList optimization                      *
   ***********************************************************/
-  const handleAddSet = (exerciseIndex) => {
-    const updated = [...session];
-    const newSet = {
-      id: `set${updated[exerciseIndex].sets.length + 1}`,
-      weight: 0,
-      reps: 0,
-      completed: false,
-    };
-    updated[exerciseIndex].sets.push(newSet);
-    setSession(updated);
-  };
-
-  /***********************************************************
-  * Description: Renders each exercise card inside the FlatList
-  * args: item (exercise), index (exerciseIndex)
-  * Output: JSX for that workout exercise block
-  ***********************************************************/
-  const renderExercise = ({ item, index: exerciseIndex }) => (
+  const renderExercise = useCallback(({ item, index: exerciseIndex }) => (
     <View
       key={item.exerciseId}
       className="mb-6 border rounded-md p-4"
@@ -143,39 +164,52 @@ export default function StartWorkout() {
           <View className="flex-1 mr-2">
             <Label>Weight (kg)</Label>
             <Input
-              keyboardType="numeric"
-              className="border-white focus:border-yellow-200 focus:ring-2 focus:ring-yellow-200"
-              value={set.weight.toString()}
+              keyboardType="decimal-pad"
+              className={twMerge(
+                "border-white focus:border-yellow-200 focus:ring-2 focus:ring-yellow-200",
+                inputErrors[`${exerciseIndex}-${setIndex}-weight`] ? "border-red-500" : ""
+              )}
+              value={set.weight}
               onChangeText={(val) =>
                 handleChange(exerciseIndex, setIndex, "weight", val)
               }
             />
+            {inputErrors[`${exerciseIndex}-${setIndex}-weight`] && (
+              <Text className="text-red-500 text-xs mt-1">
+                {inputErrors[`${exerciseIndex}-${setIndex}-weight`]}
+              </Text>
+            )}
           </View>
 
           <View className="flex-1">
             <Label>Reps</Label>
             <Input
-              keyboardType="numeric"
-              className="border-white focus:border-yellow-200 focus:ring-2 focus:ring-yellow-200"
-              value={set.reps.toString()}
+              keyboardType="number-pad"
+              className={twMerge(
+                "border-white focus:border-yellow-200 focus:ring-2 focus:ring-yellow-200",
+                inputErrors[`${exerciseIndex}-${setIndex}-reps`] ? "border-red-500" : ""
+              )}
+              value={set.reps}
               onChangeText={(val) =>
                 handleChange(exerciseIndex, setIndex, "reps", val)
               }
             />
+            {inputErrors[`${exerciseIndex}-${setIndex}-reps`] && (
+              <Text className="text-red-500 text-xs mt-1">
+                {inputErrors[`${exerciseIndex}-${setIndex}-reps`]}
+              </Text>
+            )}
           </View>
         </View>
       ))}
 
       <View className="bg-yellow-200 rounded-md">
-        <Button
-          onPress={() => handleAddSet(exerciseIndex)}
-          className="mt-2 self-end"
-        >
+        <Button onPress={() => handleAddSet(exerciseIndex)}>
           <Text className="text-sm font-semibold text-black">+ Add Set</Text>
         </Button>
       </View>
     </View>
-  );
+  ), [session, inputErrors, handleChange, handleAddSet]);
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.darkBackground }}>
@@ -198,14 +232,13 @@ export default function StartWorkout() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 45 }}
       />
 
-      {/* Fixed Save Button */}
       <View
         className="p-1 rounded-lg mx-16 mb-4 absolute bottom-0 left-0 right-0"
         style={{ backgroundColor: colors.fitness.yellow }}
       >
         <Button onPress={handleSubmitConfirm}>
           <Text className="text-black font-semibold text-sm">
-            Save Session! 🚀​
+            Save Session! 🚀
           </Text>
         </Button>
       </View>

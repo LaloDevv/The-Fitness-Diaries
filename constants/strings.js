@@ -18,6 +18,14 @@ const strings = {
     successUpdateSession: "Workout session updated successfully",
     successUpdateWeight: "Weight entry updated successfully",
     successAddWeight: "Weight entry added successfully",
+    profileTitle: "My Profile",
+    nameLabel: "Name",
+    ageLabel: "Age",
+    heightLabel: "Height",
+    latestWeightLabel: "Latest Weight",
+    weightChartLabel: "Weight Progress",
+    newWeightLabel: "Add New Weight",
+    submitWeightButton: "Save Weight",
 };
 
 export default strings;
