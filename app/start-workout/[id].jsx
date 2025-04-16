@@ -209,7 +209,7 @@ export default function StartWorkout() {
         </Button>
       </View>
     </View>
-  ), [session, inputErrors, handleChange, handleAddSet]);
+  ), [inputErrors, handleChange, handleAddSet]);
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.darkBackground }}>
