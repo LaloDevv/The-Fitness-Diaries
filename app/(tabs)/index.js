@@ -14,13 +14,14 @@ import { Button } from "../../components/ui/Button";
 import strings from "../../constants/strings";
 import colors from "../../constants/colors";
 
+
 /***********************************************************
 * Description: Home screen. Shows greeting and workouts.   *
 * args: none                                               *
 * Output: main tab screen with user info and actions       *
 ***********************************************************/
 export default function Home() {
-  const { user, deleteWorkout } = useUser();
+  const { user, loading, deleteWorkout } = useUser();
   const router = useRouter();
 
   /***********************************************************
@@ -102,8 +103,16 @@ export default function Home() {
   * Output: optimized list of workouts                      *
   ***********************************************************/
   const workouts = useMemo(() => {
-    return user.workouts;
+    return user?.workouts || [];
   }, [user.workouts]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white">Loading workouts...</Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList

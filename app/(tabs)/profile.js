@@ -13,7 +13,7 @@ import { ArrowRight } from "lucide-react-native";
 
 
 export default function Profile() {
-  const { user, addWeightEntry } = useUser();
+  const { user, addWeightEntry, loading } = useUser();
   const [weight, setWeight] = useState("");
   const MAX_VISIBLE_WEEKS = 8;
 
@@ -70,6 +70,14 @@ export default function Profile() {
     };
   }, [user.weightEntries, user.workoutSessions]);
 
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white">Loading profile...</Text>
+      </View>
+    );
+  }
+  
   return (
     <ScrollView
       className="flex-1 p-4"

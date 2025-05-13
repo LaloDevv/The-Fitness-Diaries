@@ -15,7 +15,7 @@ import { format } from "date-fns";
 export default function WeekHistory() {
     const { weekNumber } = useLocalSearchParams();
     const router = useRouter();
-    const { user } = useUser();
+    const { user, loading } = useUser();
 
     const week = parseInt(weekNumber);
 
@@ -63,6 +63,14 @@ export default function WeekHistory() {
             </Text>
         </Pressable>
     );
+
+    if (loading || !user.workoutSessions.length) {
+        return (
+            <View className="flex-1 items-center justify-center bg-black">
+                <Text className="text-white">Loading week data...</Text>
+            </View>
+        );
+    }
 
     return (
         <View className="flex-1 px-4 pt-4" style={{ backgroundColor: colors.darkBackground }}>

@@ -6,7 +6,7 @@ import { useUser } from "../../context/UserContext";
 import colors from "../../constants/colors";
 
 export default function History() {
-    const { user } = useUser();
+    const { user, loading  } = useUser();
     const router = useRouter();
 
     // Memoized sorted array of unique week numbers
@@ -33,6 +33,14 @@ export default function History() {
         );
       }, [user.workoutSessions, router]);
 
+      if (loading || !user.workoutSessions) {
+        return (
+          <View className="flex-1 items-center justify-center bg-black">
+            <Text className="text-white">Loading history...</Text>
+          </View>
+        );
+      }
+      
     return (
         <FlatList
             className="px-4 pt-6"

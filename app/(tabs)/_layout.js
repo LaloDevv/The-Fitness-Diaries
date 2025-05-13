@@ -1,12 +1,20 @@
 /* eslint-disable prettier/prettier */
 import { Tabs } from "expo-router";
+import { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, Image } from "react-native";
 import colors from "../../constants/colors";
 import icons from "../../constants/icons";
 import strings from "../../constants/strings";
+import { uploadUserData } from "../../scripts/uploadUserData";
 
 export default function TabLayout() {
+  
+  /*
+  useEffect(() => {
+    uploadUserData(); // ⚠️ Ejecutar solo una vez. Elimina después.
+  }, []);
+*/
   return (
     <Tabs
       screenOptions={{

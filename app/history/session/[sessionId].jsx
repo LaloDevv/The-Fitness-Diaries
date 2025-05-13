@@ -10,7 +10,7 @@ import colors from "../../../constants/colors";
 export default function SessionHistory() {
   const { sessionId } = useLocalSearchParams();
   const router = useRouter();
-  const { user } = useUser();
+  const { user, loading } = useUser();
 
   const session = user.workoutSessions.find((s) => s.id === sessionId);
 
@@ -84,6 +84,22 @@ export default function SessionHistory() {
     </View>
   );
 
+  if (loading || !user.workoutSessions.length) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white">Loading history...</Text>
+      </View>
+    );
+  }
+
+  if (!session) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white text-lg">Session not found.</Text>
+      </View>
+    );
+  }
+  
   return (
     <View className="flex-1 px-4 pt-4" style={{ backgroundColor: colors.darkBackground }}>
       <View className="flex-row items-center mb-6 mt-4">

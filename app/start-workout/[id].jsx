@@ -20,7 +20,7 @@ import { twMerge } from "tailwind-merge";
 
 export default function StartWorkout() {
   const { id } = useLocalSearchParams();
-  const { user, addWorkoutSession } = useUser();
+  const { user, loading ,addWorkoutSession } = useUser();
   const router = useRouter();
   const [inputErrors, setInputErrors] = useState({});
 
@@ -211,6 +211,15 @@ export default function StartWorkout() {
     </View>
   ), [inputErrors, handleChange, handleAddSet]);
 
+
+  if (loading || !user.workouts.length) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-lg">Loading workout...</Text>
+      </View>
+    );
+  }
+  
   return (
     <View className="flex-1" style={{ backgroundColor: colors.darkBackground }}>
       <FlatList
