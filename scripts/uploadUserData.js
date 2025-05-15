@@ -4,10 +4,11 @@ import { db } from "../firebase/firebaseConfig";
 import userData from "../data/userData";
 
 const DUMMY_UID = "dummyUID123";
+const uid = "1YQsIDv0N7bEQ40L2Q38WLqG23M2";
 
 export const uploadUserData = async () => {
   try {
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", uid);
 
     // ✅ Subir datos generales (name, age, height)
     await setDoc(userRef, {

@@ -13,6 +13,7 @@ import { db } from "../firebase/firebaseConfig";
 import Toast from "react-native-toast-message";
 import strings from "../constants/strings";
 import { startOfWeek } from "date-fns";
+import { useAuth } from "./AuthContext";
 
 const UserContext = createContext();
 const DUMMY_UID = "dummyUID123";
@@ -22,6 +23,8 @@ const DUMMY_UID = "dummyUID123";
  * @description Provides all user data and action functions from Firestore via context.
  */
 export const UserProvider = ({ children }) => {
+  const { user: authUser } = useAuth();
+
   const [user, setUserData] = useState({
     name: "",
     age: null,
@@ -32,6 +35,7 @@ export const UserProvider = ({ children }) => {
     weeks: [],
   });
   const [loading, setLoading] = useState(true);
+  const uid = authUser?.uid;
 
   /**
    * @function fetchUserData
