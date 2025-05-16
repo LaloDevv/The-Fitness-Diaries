@@ -3,10 +3,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
-    signOut,
     createUserWithEmailAndPassword
 } from "firebase/auth";
-import { auth } from "../firebase/firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebaseConfig";
 
 
 // Create context
@@ -36,10 +36,20 @@ export const AuthProvider = ({ children }) => {
     };
 
 
-    // Register new user
-    const register = async (email, password) => {
-        await createUserWithEmailAndPassword(auth, email, password);
-    };
+    const register = async (email, password, { name, age, height }) => {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+      
+        const userRef = doc(db, "users", uid);
+      
+        await setDoc(userRef, {
+          name,
+          age,
+          height,
+        });
+      
+        console.log("✅ Usuario creado en Auth y Firestore:", uid);
+      };
 
     return (
         <AuthContext.Provider value={{ user, login, register, authLoading }}>

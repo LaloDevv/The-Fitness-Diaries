@@ -11,7 +11,6 @@ import strings from "../../constants/strings";
 import { LineChart } from "react-native-chart-kit";
 import { ArrowRight } from "lucide-react-native";
 
-
 export default function Profile() {
   const { user, addWeightEntry, loading } = useUser();
   const [weight, setWeight] = useState("");
@@ -41,14 +40,18 @@ export default function Profile() {
   ***********************************************************/
   const chartData = useMemo(() => {
     const visibleWeights = user.weightEntries.slice(-MAX_VISIBLE_WEEKS);
-    const weightLabels = visibleWeights.map((entry) => `W${entry.week}`);
-    const weightData = visibleWeights.map((entry) => entry.weight);
+
+    const cleanedWeights = visibleWeights
+      .filter((entry) => typeof entry.weight === "number" && isFinite(entry.weight));
+
+    const weightLabels = cleanedWeights.map((entry) => `W${entry.week}`);
+    const weightData = cleanedWeights.map((entry) => entry.weight);
 
     const volumesByWeek = {};
     user.workoutSessions.forEach((session) => {
-      const validVolume = session.exercises.flatMap((ex) =>
+      const validVolume = session.exercises?.flatMap((ex) =>
         ex.sets.filter((s) => s.reps > 0 && s.weight > 0)
-      ).reduce((sum, s) => sum + s.weight * s.reps, 0);
+      ).reduce((sum, s) => sum + s.weight * s.reps, 0) || 0;
 
       if (volumesByWeek[session.weekNumber]) {
         volumesByWeek[session.weekNumber] += validVolume;
@@ -61,14 +64,22 @@ export default function Profile() {
       .sort((a, b) => a - b)
       .slice(-MAX_VISIBLE_WEEKS);
 
-    const volumeLabels = sortedWeeks.map((w) => `W${w}`);
-    const volumeData = sortedWeeks.map((w) => volumesByWeek[w]);
+    const volumeData = sortedWeeks
+      .map((w) => volumesByWeek[w])
+      .filter((v) => typeof v === "number" && isFinite(v));
+
+    const volumeLabels = sortedWeeks.slice(0, volumeData.length).map((w) => `W${w}`);
 
     return {
       weight: { labels: weightLabels, data: weightData },
       volume: { labels: volumeLabels, data: volumeData },
     };
   }, [user.weightEntries, user.workoutSessions]);
+
+  const isChartDataValid = (dataArray) =>
+    Array.isArray(dataArray) &&
+    dataArray.length > 0 &&
+    dataArray.every((val) => typeof val === "number" && isFinite(val));
 
   if (loading) {
     return (
@@ -78,7 +89,7 @@ export default function Profile() {
       </View>
     );
   }
-  
+
   return (
     <ScrollView
       className="flex-1 p-4"
@@ -143,30 +154,34 @@ export default function Profile() {
           <Text className="text-white text-center font-semibold mb-2">
             Weight Progress
           </Text>
-          <LineChart
-            data={{
-              labels: chartData.weight.labels,
-              datasets: [{ data: chartData.weight.data }],
-            }}
-            width={Dimensions.get("window").width - 32}
-            height={220}
-            yAxisSuffix=" kg"
-            chartConfig={{
-              backgroundColor: colors.darkBackground,
-              backgroundGradientFrom: colors.darkBackground,
-              backgroundGradientTo: colors.darkBackground,
-              decimalPlaces: 1,
-              color: () => colors.fitness.pastelYellow,
-              labelColor: () => "#d1d5db",
-              propsForDots: {
-                r: "4",
-                strokeWidth: "2",
-                stroke: colors.fitness.yellow,
-              },
-            }}
-            bezier
-            style={{ borderRadius: 16 }}
-          />
+          {isChartDataValid(chartData.weight.data) ? (
+            <LineChart
+              data={{
+                labels: chartData.weight.labels,
+                datasets: [{ data: chartData.weight.data }],
+              }}
+              width={Dimensions.get("window").width - 32}
+              height={220}
+              yAxisSuffix=" kg"
+              chartConfig={{
+                backgroundColor: colors.darkBackground,
+                backgroundGradientFrom: colors.darkBackground,
+                backgroundGradientTo: colors.darkBackground,
+                decimalPlaces: 1,
+                color: () => colors.fitness.pastelYellow,
+                labelColor: () => "#d1d5db",
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "2",
+                  stroke: colors.fitness.yellow,
+                },
+              }}
+              bezier
+              style={{ borderRadius: 16 }}
+            />
+          ) : (
+            <Text className="text-gray-400 text-center mb-4 italic">No weight data available.</Text>
+          )}
         </View>
 
         {/* Volume Chart */}
@@ -174,30 +189,34 @@ export default function Profile() {
           <Text className="text-white text-center font-semibold mb-2">
             Volume Progress
           </Text>
-          <LineChart
-            data={{
-              labels: chartData.volume.labels,
-              datasets: [{ data: chartData.volume.data }],
-            }}
-            width={Dimensions.get("window").width - 32}
-            height={220}
-            yAxisSuffix=" kg"
-            chartConfig={{
-              backgroundColor: colors.darkBackground,
-              backgroundGradientFrom: colors.darkBackground,
-              backgroundGradientTo: colors.darkBackground,
-              decimalPlaces: 0,
-              color: () => colors.fitness.pastelYellow,
-              labelColor: () => "#d1d5db",
-              propsForDots: {
-                r: "4",
-                strokeWidth: "2",
-                stroke: colors.fitness.yellow,
-              },
-            }}
-            bezier
-            style={{ borderRadius: 16 }}
-          />
+          {isChartDataValid(chartData.volume.data) ? (
+            <LineChart
+              data={{
+                labels: chartData.volume.labels,
+                datasets: [{ data: chartData.volume.data }],
+              }}
+              width={Dimensions.get("window").width - 32}
+              height={220}
+              yAxisSuffix=" kg"
+              chartConfig={{
+                backgroundColor: colors.darkBackground,
+                backgroundGradientFrom: colors.darkBackground,
+                backgroundGradientTo: colors.darkBackground,
+                decimalPlaces: 0,
+                color: () => colors.fitness.pastelYellow,
+                labelColor: () => "#d1d5db",
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "2",
+                  stroke: colors.fitness.yellow,
+                },
+              }}
+              bezier
+              style={{ borderRadius: 16 }}
+            />
+          ) : (
+            <Text className="text-gray-400 text-center mb-4 italic">No volume data available.</Text>
+          )}
         </View>
       </ScrollView>
 
@@ -205,7 +224,6 @@ export default function Profile() {
         <Text className="text-white text-base mr-1 italic font-bold">Scroll to see more</Text>
         <ArrowRight size={20} color="white" />
       </View>
-
 
       {/* Weight Input */}
       <View className="mb-6">

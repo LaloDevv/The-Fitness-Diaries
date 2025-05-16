@@ -1,128 +1,153 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
-import { Text, TextInput, Pressable, Alert, ScrollView } from "react-native";
+import { Text, TextInput, Pressable, Alert, ScrollView, View, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 import colors from "../constants/colors";
+import strings from "../constants/strings";
 
 export default function RegisterScreen() {
-  const { register } = useAuth();
-  const router = useRouter();
+    const { register } = useAuth();
+    const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [height, setHeight] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [repeatPassword, setRepeatPassword] = useState("");
+    const [name, setName] = useState("");
+    const [age, setAge] = useState("");
+    const [height, setHeight] = useState("");
 
-  const handleRegister = async () => {
-    // Validaciones
-    if (!email || !password || !repeatPassword || !name || !age || !height) {
-      Alert.alert("Error", "Por favor, completa todos los campos.");
-      return;
-    }
+    const handleRegister = async () => {
+        // Validaciones
+        if (!email || !password || !repeatPassword || !name || !age || !height) {
+            Alert.alert("Error", "Por favor, completa todos los campos.");
+            return;
+        }
 
-    if (password !== repeatPassword) {
-      Alert.alert("Error", "Las contraseñas no coinciden.");
-      return;
-    }
+        if (password !== repeatPassword) {
+            Alert.alert("Error", "Las contraseñas no coinciden.");
+            return;
+        }
 
-    const parsedAge = parseInt(age, 10);
-    const parsedHeight = parseInt(height, 10);
+        const parsedAge = parseInt(age, 10);
+        const parsedHeight = parseInt(height, 10);
 
-    if (isNaN(parsedAge) || parsedAge <= 0) {
-      Alert.alert("Error", "La edad debe ser un número positivo.");
-      return;
-    }
+        if (isNaN(parsedAge) || parsedAge <= 0) {
+            Alert.alert("Error", "La edad debe ser un número positivo.");
+            return;
+        }
 
-    if (isNaN(parsedHeight) || parsedHeight <= 0) {
-      Alert.alert("Error", "La altura debe ser un número positivo.");
-      return;
-    }
+        if (isNaN(parsedHeight) || parsedHeight <= 0) {
+            Alert.alert("Error", "La altura debe ser un número positivo.");
+            return;
+        }
 
-    try {
-      await register(email, password, {
-        name: name.trim(),
-        age: parsedAge,
-        height: parsedHeight,
-      });
-      Alert.alert("Registro exitoso", "Ya puedes iniciar sesión.");
-      router.replace("/"); // Navegar al login
-    } catch (error) {
-      console.error("Error en el registro:", error);
-      Alert.alert("Error", "No se pudo completar el registro.");
-    }
-  };
+        try {
+            await register(email, password, {
+                name: name.trim(),
+                age: parsedAge,
+                height: parsedHeight,
+            });
+            router.replace("/"); // Navegar al login
+        } catch (error) {
+            console.error("Error en el registro:", error);
+            Alert.alert("Error", "No se pudo completar el registro.");
+        }
+    };
 
-  return (
-    <ScrollView className="flex-1 px-4 pt-10" style={{ backgroundColor: colors.darkBackground }}>
-      <Text className="text-white text-2xl font-bold mb-6 text-center">Crear Cuenta</Text>
+    return (
+        <ScrollView className="px-4 pt-10"
+            style={{ backgroundColor: colors.darkBackground }}
+        >
+            <View className="flex flex-row items-center mb-10">
+                <Image
+                    source={require("../assets/images/tfd-logo-transparent.png")}
+                    className="w-16 h-16 ml-4"
+                    resizeMode="contain"
+                />
+                <Text className="text-white text-xl font-semibold ml-6">
+                    {strings.appName}
+                </Text>
+            </View>
 
-      <TextInput
-        placeholder="Email"
-        placeholderTextColor="#ccc"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        className="border border-white rounded p-2 mb-4 text-white"
-      />
+            <Text className="text-white text-2xl italic font-bold mb-6 text-center">Join to our family!</Text>
 
-      <TextInput
-        placeholder="Contraseña"
-        placeholderTextColor="#ccc"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        className="border border-white rounded p-2 mb-4 text-white"
-      />
+            <TextInput
+                placeholder="Email"
+                placeholderTextColor="#ccc"
+                className="border rounded px-4 py-2 mb-4 text-white"
+                style={{ borderColor: colors.fitness.pastelYellow }}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+            />
 
-      <TextInput
-        placeholder="Repite la contraseña"
-        placeholderTextColor="#ccc"
-        value={repeatPassword}
-        onChangeText={setRepeatPassword}
-        secureTextEntry
-        className="border border-white rounded p-2 mb-4 text-white"
-      />
+            <TextInput
+                placeholder="Password"
+                placeholderTextColor="#ccc"
+                className="border rounded px-4 py-2 mb-6 text-white"
+                style={{ borderColor: colors.fitness.pastelYellow }}
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+            />
 
-      <TextInput
-        placeholder="Nombre"
-        placeholderTextColor="#ccc"
-        value={name}
-        onChangeText={setName}
-        className="border border-white rounded p-2 mb-4 text-white"
-      />
+            <TextInput
+                placeholder="Repeat Password"
+                placeholderTextColor="#ccc"
+                className="border rounded px-4 py-2 mb-6 text-white"
+                style={{ borderColor: colors.fitness.pastelYellow }}
+                secureTextEntry
+                value={repeatPassword}
+                onChangeText={setRepeatPassword}
+            />
 
-      <TextInput
-        placeholder="Edad"
-        placeholderTextColor="#ccc"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
-        className="border border-white rounded p-2 mb-4 text-white"
-      />
+            <TextInput
+                placeholder="Name"
+                placeholderTextColor="#ccc"
+                className="border rounded px-4 py-2 mb-4 text-white"
+                style={{ borderColor: colors.fitness.pastelYellow }}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={name}
+                onChangeText={setName}
+            />
 
-      <TextInput
-        placeholder="Altura (cm)"
-        placeholderTextColor="#ccc"
-        value={height}
-        onChangeText={setHeight}
-        keyboardType="numeric"
-        className="border border-white rounded p-2 mb-6 text-white"
-      />
+            <TextInput
+                placeholder="Age"
+                placeholderTextColor="#ccc"
+                className="border rounded px-4 py-2 mb-4 text-white"
+                style={{ borderColor: colors.fitness.pastelYellow }}
+                autoCapitalize="none"
+                keyboardType="numeric"
+                value={age}
+                onChangeText={setAge}
+            />
 
-      <Pressable
-        onPress={handleRegister}
-        className="bg-white py-3 rounded items-center"
-      >
-        <Text className="text-black font-semibold">Registrarse</Text>
-      </Pressable>
+            <TextInput
+                placeholder="Height (cm)"
+                placeholderTextColor="#ccc"
+                className="border rounded px-4 py-2 mb-4 text-white"
+                style={{ borderColor: colors.fitness.pastelYellow }}
+                keyboardType="numeric"
+                value={height}
+                onChangeText={setHeight}
+            />
 
-      <Pressable onPress={() => router.replace("/")} className="mt-4 items-center">
-        <Text className="text-gray-300">¿Ya tienes cuenta? Inicia sesión</Text>
-      </Pressable>
-    </ScrollView>
-  );
+            <Pressable
+                onPress={handleRegister}
+                className="py-3 rounded items-center" style={{ backgroundColor: colors.fitness.pastelYellow }}
+            >
+                <Text className="text-black font-semibold">Registrarse</Text>
+            </Pressable>
+
+            <Pressable onPress={() => router.push("/")} className="mt-4 items-center">
+                <Text className="text-white">
+                    ¿Ya tienes cuenta?{" "}
+                    <Text className="text-blue-400 underline">Inicia sesión</Text>
+                </Text>
+            </Pressable>
+        </ScrollView>
+    );
 }

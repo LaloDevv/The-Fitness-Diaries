@@ -67,6 +67,14 @@ export default function LoginScreen() {
         <Pressable onPress={handleLogin} className="py-3 rounded items-center" style={{ backgroundColor: colors.fitness.pastelYellow }}>
           <Text className="text-black font-semibold">Login</Text>
         </Pressable>
+
+        <Pressable onPress={() => router.push("/register")} className="mt-4 items-center">
+          <Text className="text-white">
+            ¿No tienes cuenta?{" "}
+            <Text className="text-blue-400 underline">Regístrate</Text>
+          </Text>
+        </Pressable>
+        
       </View>
     </View>
   );

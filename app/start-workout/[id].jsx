@@ -155,7 +155,7 @@ export default function StartWorkout() {
 
       {item.sets.map((set, setIndex) => (
         <View
-          key={`${item.exerciseId}-set${setIndex}`}
+          key={set.id}
           className="flex-row mb-3"
         >
           <Text className="text-white text-sm italic font-bold mr-2">
