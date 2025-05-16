@@ -6,6 +6,7 @@ import {
   FlatList,
   Alert,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUser } from "../../context/UserContext";
@@ -214,8 +215,9 @@ export default function StartWorkout() {
 
   if (loading || !user.workouts.length) {
     return (
-      <View className="flex-1 items-center justify-center bg-black">
-        <Text className="text-lg">Loading workout...</Text>
+      <View className="flex-1 flex-col items-center justify-center bg-black">
+        <Text className="text-white mb-4">Loading workouts...</Text>
+        <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );
   }

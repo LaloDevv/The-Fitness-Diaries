@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
-    getAuth,
     onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut,
@@ -9,22 +8,26 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
 
+
 // Create context
 const AuthContext = createContext();
 
 // Provider component
 export const AuthProvider = ({ children }) => {
-    const [uid, setUid] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [authLoading, setAuthLoading] = useState(true);
 
     // Check for auth state
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUid(user ? user.uid : null);
-            setLoading(false);
+            if(user){
+                console.log("Auth state CHANGE en AuthContext: " + user.email + " " + user.uid);
+            }
+            setUser(user);
+            setAuthLoading(false);
         });
 
-        return unsubscribe;
+        return () => unsubscribe();
     }, []);
 
     // Sign in function
@@ -32,19 +35,14 @@ export const AuthProvider = ({ children }) => {
         await signInWithEmailAndPassword(auth, email, password);
     };
 
-    // Sign out function
-    const logout = async () => {
-        await signOut(auth);
-    };
 
     // Register new user
     const register = async (email, password) => {
         await createUserWithEmailAndPassword(auth, email, password);
     };
 
-
     return (
-        <AuthContext.Provider value={{ uid, login, logout, register, loading }}>
+        <AuthContext.Provider value={{ user, login, register, authLoading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -7,7 +7,7 @@ import Toast from 'react-native-toast-message';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from "../context/AuthContext";
 import { uploadUserData } from "../scripts/uploadUserData";
-import { useEffect } from "react";
+
 
 const queryClient = new QueryClient();
 
@@ -21,14 +21,15 @@ export default function Layout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <UserProvider>
-          <View className="flex-1 bg-fitness-darkBackground">
-            <StatusBar style="light" />
-            <Stack screenOptions={{ headerShown: false }} />
-            <Toast />
-          </View>
-        </UserProvider>
+          <UserProvider>
+            <View className="flex-1 bg-fitness-darkBackground">
+              <StatusBar style="light" />
+              <Stack screenOptions={{ headerShown: false }} />
+              <Toast />
+            </View>
+          </UserProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
+  
 }

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useMemo, useCallback } from "react";
-import { View, Text, Pressable, FlatList } from "react-native";
+import { View, Text, Pressable, FlatList, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useUser } from "../../context/UserContext";
 import colors from "../../constants/colors";
@@ -33,10 +33,11 @@ export default function History() {
         );
       }, [user.workoutSessions, router]);
 
-      if (loading || !user.workoutSessions) {
+      if (loading) {
         return (
-          <View className="flex-1 items-center justify-center bg-black">
-            <Text className="text-white">Loading history...</Text>
+          <View className="flex-1 flex-col items-center justify-center bg-black">
+            <Text className="text-white mb-4">Loading workouts...</Text>
+            <ActivityIndicator size="large" color="#ffffff" />
           </View>
         );
       }

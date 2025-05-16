@@ -1,13 +1,14 @@
 /* eslint-disable prettier/prettier */
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Text, Image } from "react-native";
+import { Text, Image  } from "react-native";
 import colors from "../../constants/colors";
 import icons from "../../constants/icons";
 import strings from "../../constants/strings";
 
+
 export default function TabLayout() {
-  
+
   return (
     <Tabs
       screenOptions={{

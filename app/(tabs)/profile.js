@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useMemo } from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
+import { View, Text, ScrollView, Dimensions, ActivityIndicator } from "react-native";
 import { useUser } from "../../context/UserContext";
 import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
@@ -72,8 +72,9 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-black">
-        <Text className="text-white">Loading profile...</Text>
+      <View className="flex-1 flex-col items-center justify-center bg-black">
+        <Text className="text-white mb-4">Loading workouts...</Text>
+        <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );
   }

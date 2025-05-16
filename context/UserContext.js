@@ -16,14 +16,17 @@ import { startOfWeek } from "date-fns";
 import { useAuth } from "./AuthContext";
 
 const UserContext = createContext();
-const DUMMY_UID = "dummyUID123";
 
 /**
  * @function UserProvider
  * @description Provides all user data and action functions from Firestore via context.
  */
 export const UserProvider = ({ children }) => {
+
+  const [loading, setLoading] = useState(true);
   const { user: authUser } = useAuth();
+  console.log("User en userContext:", authUser ? `${authUser.uid} ${authUser.email}` : "undefined");
+
 
   const [user, setUserData] = useState({
     name: "",
@@ -34,16 +37,20 @@ export const UserProvider = ({ children }) => {
     weightEntries: [],
     weeks: [],
   });
-  const [loading, setLoading] = useState(true);
-  const uid = authUser?.uid;
 
   /**
    * @function fetchUserData
    * @description Loads the document fields and all subcollections from Firestore.
    */
-  const fetchUserData = async () => {
+  const fetchUserData = async (uid) => {
+    
+    if (!uid) {
+      console.warn('⚠️ fetchUserData: uid no definido');
+      return;
+    }
+    
     try {
-      const userRef = doc(db, "users", DUMMY_UID);
+      const userRef = doc(db, "users", uid);
 
       const [docSnap, workoutsSnap, sessionsSnap, weightsSnap, weeksSnap] = await Promise.all([
         getDoc(userRef),
@@ -75,15 +82,17 @@ export const UserProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (authUser?.uid) {
+      fetchUserData(authUser.uid);
+    }
+  }, [authUser]);
 
   /**
    * @function addWorkout
    * @description Adds a new workout to Firestore and refreshes state.
    */
   const addWorkout = async (workout) => {
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", authUser.uid);
     const workoutRef = doc(collection(userRef, "workouts"));
 
     // Assign the document ID inside the object
@@ -93,7 +102,7 @@ export const UserProvider = ({ children }) => {
   };
 
     await setDoc(workoutRef, workoutWithId);
-    await fetchUserData();
+    await fetchUserData(authUser.uid);
     Toast.show({ type: "success", text1: strings.successAddWorkout });
   };
 
@@ -102,10 +111,10 @@ export const UserProvider = ({ children }) => {
    * @description Updates an existing workout in Firestore.
    */
   const updateWorkout = async (workout) => {
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", authUser.uid);
     const workoutRef = doc(userRef, "workouts", workout.id);
     await updateDoc(workoutRef, workout);
-    await fetchUserData();
+    await fetchUserData(authUser.uid);
     Toast.show({ type: "success", text1: strings.successUpdateWorkout });
   };
 
@@ -114,10 +123,10 @@ export const UserProvider = ({ children }) => {
    * @description Deletes a workout by ID from Firestore.
    */
   const deleteWorkout = async (workoutId) => {
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", authUser.uid);
     const workoutRef = doc(userRef, "workouts", workoutId);
     await deleteDoc(workoutRef);
-    await fetchUserData();
+    await fetchUserData(authUser.uid);
     Toast.show({ type: "success", text1: strings.successDeleteWorkout });
   };
 
@@ -133,7 +142,7 @@ export const UserProvider = ({ children }) => {
     const monday = startOfWeek(today, { weekStartsOn: 1 });
     const mondayISO = monday.toISOString().split("T")[0];
 
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", authUser.uid);
     const weeksRef = collection(userRef, "weeks");
 
     // Add week if not already present
@@ -156,7 +165,7 @@ export const UserProvider = ({ children }) => {
 
     const sessionRef = doc(collection(userRef, "workoutSessions"));
     await setDoc(sessionRef, newSession);
-    await fetchUserData();
+    await fetchUserData(authUser.uid);
   };
 
   /**
@@ -164,10 +173,10 @@ export const UserProvider = ({ children }) => {
    * @description Updates a workout session in Firestore.
    */
   const updateWorkoutSession = async (session) => {
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", authUser.uid);
     const sessionRef = doc(userRef, "workoutSessions", session.id);
     await updateDoc(sessionRef, session);
-    await fetchUserData();
+    await fetchUserData(authUser.uid);
   };
 
   /**
@@ -200,7 +209,7 @@ export const UserProvider = ({ children }) => {
     const monday = startOfWeek(today, { weekStartsOn: 1 });
     const mondayISO = monday.toISOString().split("T")[0];
 
-    const userRef = doc(db, "users", DUMMY_UID);
+    const userRef = doc(db, "users", authUser.uid);
     const weeksRef = collection(userRef, "weeks");
     const weightsRef = collection(userRef, "weightEntries");
 
@@ -235,7 +244,7 @@ export const UserProvider = ({ children }) => {
       Toast.show({ type: "success", text1: strings.successAddWeight });
     }
 
-    await fetchUserData();
+    await fetchUserData(authUser.uid);
   };
 
   return (

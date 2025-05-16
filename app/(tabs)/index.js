@@ -6,6 +6,7 @@ import {
   FlatList,
   Pressable,
   Alert,
+  ActivityIndicator
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Plus, Trash2 } from "lucide-react-native";
@@ -108,8 +109,9 @@ export default function Home() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-black">
-        <Text className="text-white">Loading workouts...</Text>
+      <View className="flex-1 flex-col items-center justify-center bg-black">
+        <Text className="text-white mb-4">Loading workouts...</Text>
+        <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );
   }

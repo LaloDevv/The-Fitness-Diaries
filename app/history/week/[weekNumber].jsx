@@ -5,6 +5,7 @@ import {
     Text,
     FlatList,
     Pressable,
+    ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useUser } from "../../../context/UserContext";
@@ -64,10 +65,13 @@ export default function WeekHistory() {
         </Pressable>
     );
 
+
+
     if (loading || !user.workoutSessions.length) {
         return (
-            <View className="flex-1 items-center justify-center bg-black">
-                <Text className="text-white">Loading week data...</Text>
+            <View className="flex-1 flex-col items-center justify-center bg-black">
+                <Text className="text-white mb-4">Loading workouts...</Text>
+                <ActivityIndicator size="large" color="#ffffff" />
             </View>
         );
     }
