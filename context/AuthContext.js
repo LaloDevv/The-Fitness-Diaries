@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         });
       
         console.log("✅ Usuario creado en Auth y Firestore:", uid);
-      };
+    };
 
     return (
         <AuthContext.Provider value={{ user, login, register, authLoading }}>
