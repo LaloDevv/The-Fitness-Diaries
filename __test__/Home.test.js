@@ -3,14 +3,14 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import Home from '../app/(tabs)/index';
 
-// Mock del router de Expo para interceptar navegación sin errores
+//mock del router de Expo para interceptar navegación sin errores
 jest.mock('expo-router', () => ({
   useRouter: () => ({
-    push: jest.fn(), // Simula la función push de navegación
+    push: jest.fn(),
   }),
 }));
 
-// Mock del contexto UserContext, devolviendo datos simulados
+//mock del contexto UserContext, devolviendo datos simulados
 jest.mock('../context/UserContext', () => ({
   useUser: () => ({
     user: {
@@ -23,7 +23,7 @@ jest.mock('../context/UserContext', () => ({
             { name: 'Bench Press' },
             { name: 'Shoulder Press' },
             { name: 'Triceps Dips' },
-            { name: 'Chest Fly' }, // más de 3 ejercicios
+            { name: 'Chest Fly' }, //más de 3 ejercicios
           ],
         },
       ],
@@ -33,36 +33,36 @@ jest.mock('../context/UserContext', () => ({
   }),
 }));
 
-// Test 1: Verifica que se muestra el mensaje de bienvenida con el nombre del usuario
+//Test 1: verifica que se muestra el mensaje de bienvenida con el nombre del usuario
 it('muestra el mensaje de bienvenida con el nombre del usuario', () => {
     const { getByText } = render(<Home />);
-    // Busca el texto que contiene tanto "Welcome" como "Test User"
+    //busca el texto que contiene tanto "Welcome" como "Test User"
     expect(getByText(/welcome, test user/i)).toBeTruthy();
   });
   
 
-// Test 2: Comprueba que se renderiza la tarjeta del entrenamiento
+//Test 2: comprueba que se renderiza la tarjeta del entrenamiento
 it('muestra una tarjeta con el nombre del entrenamiento y ejercicios', () => {
   const { getByText } = render(<Home />);
-  expect(getByText('Push Day')).toBeTruthy();           // Verifica el nombre del entrenamiento
-  expect(getByText('4 exercises')).toBeTruthy();        // Verifica la cantidad total de ejercicios
+  expect(getByText('Push Day')).toBeTruthy();     
+  expect(getByText('4 exercises')).toBeTruthy();       
 });
 
-// Test 3: Verifica que se muestra "+1 more" si hay más de 3 ejercicios
+//Test 3: verifica que se muestra "+1 more" si hay más de 3 ejercicios
 it('muestra el texto "+1 more" cuando hay más de 3 ejercicios', () => {
   const { getByText } = render(<Home />);
-  expect(getByText('+1 more')).toBeTruthy();            // Verifica el mensaje adicional por ejercicios extra
+  expect(getByText('+1 more')).toBeTruthy();            
 });
 
-// Test 4: Comprueba que el botón "Add Workout" navega correctamente
+//Test 4: comprueba que el botón "Add Workout" navega correctamente
 it('navega a "/add-workout" al pulsar el botón', () => {
-  const mockPush = jest.fn(); // Función simulada para rastrear navegación
+  const mockPush = jest.fn();
 
-  // Sobrescribe el mock anterior con una versión espía
+  //cuando el componente Home llame a useRouter(), en lugar de usar el router real, usará mockPush
   jest.spyOn(require('expo-router'), 'useRouter').mockReturnValue({ push: mockPush });
 
   const { getByText } = render(<Home />);
-  fireEvent.press(getByText(/add workout/i));           // Simula pulsar el botón
+  fireEvent.press(getByText(/add workout/i)); //simula pulsar el botón
 
-  expect(mockPush).toHaveBeenCalledWith('/add-workout'); // Comprueba que se llamó a push con la ruta esperada
+  expect(mockPush).toHaveBeenCalledWith('/add-workout'); //comprueba que se llamó a push con la ruta esperada
 });
