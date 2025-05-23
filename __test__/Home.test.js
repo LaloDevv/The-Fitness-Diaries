@@ -38,7 +38,7 @@ it('muestra el mensaje de bienvenida con el nombre del usuario', () => {
     const { getByText } = render(<Home />);
     //busca el texto que contiene tanto "Welcome" como "Test User"
     expect(getByText(/welcome, test user/i)).toBeTruthy();
-  });
+});
   
 
 //Test 2: comprueba que se renderiza la tarjeta del entrenamiento
