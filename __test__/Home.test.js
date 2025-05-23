@@ -3,7 +3,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import Home from '../app/(tabs)/index';
 
-//mock del router de Expo para interceptar navegación sin errores
+//mock del router de Expo 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: jest.fn(),
