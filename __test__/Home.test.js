@@ -64,5 +64,5 @@ it('navega a "/add-workout" al pulsar el botón', () => {
   const { getByText } = render(<Home />);
   fireEvent.press(getByText(/add workout/i)); //simula pulsar el botón
 
-  expect(mockPush).toHaveBeenCalledWith('/add-workout'); //comprueba que se llamó a push con la ruta esperada
+  expect(mockPush).toHaveBeenCalledWith('/add-workout'); //comprueba que se llamó a push con la ruta '/add-workout'
 });
